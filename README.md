@@ -1,6 +1,9 @@
-# Hackaton_EESTech
 
-# Hackaton EESTech
+<div align="center">
+    <h1># Hackaton EESTech</h1>
+    <h3>Author: Nicola Battison, Christian Faccio, Manuel Magnabosco</h3>
+</div>
+
 di Nicola Battison, Christian Faccio, Manuel Magnabosco  
 Maggio 2025 
 
