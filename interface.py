@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import googlemaps # type: ignore
 
 def parse_url(url):
     """
@@ -12,8 +11,7 @@ def parse_url(url):
     return path_data
 
 def main():
-    st.title("E-Bike Battery Optimizer")
-    st.write("Enter a Google Maps URL to optimize your e-bike battery performance.")
+    st.title("E-Bike BMS")
 
     # Google Maps URL input
     url = st.text_input("Google Maps URL", "")
@@ -45,6 +43,7 @@ def main():
         value="Eco",
         format_func=lambda x: f"• {x}"
     )
+    
 
 if __name__ == "__main__":
     main()
