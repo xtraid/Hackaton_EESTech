@@ -1,0 +1,6 @@
+Applicazione per il telefono per i clienti delle e-bike. L'App deve ricevere dall'utente un link di Google Maps con il percorso che vuole fare, avere una scroll-bar orizzontale per scegliere quanta fatica vuole fare e scegliere anche con quanta batteria vuole arrivare alla fine del percorso.
+
+Questi dati verranno passati ad un programma esterno che calcolerà il modo più efficente per utilizzare la batteria durante il percorso. In caso che il programma dica che le richieste del cliente non siano soddisfabili, aprire un'altra schermata che consigli un cambio delle impostazioni per trovare un compromesso.
+
+Chiedere all'utente se è disposto a modificare il percorso, se risponde di si proporre un percorso diverso, altrimenti 
+sempre tramite il programma esterno applicare modifiche agli altri 2 paramentri (fare in modo che quando viene modificato un paramentro dall'utente questo venga mandato alla funzione che torni il valore di conseguenza dell'altro parametro)
