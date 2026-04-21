@@ -1,74 +1,123 @@
+# eBike Smart Assist
 
-<div align="center">
-    <h1># Hackaton EESTech</h1>
-    <h3>Author: Nicola Battison, Christian Faccio, Manuel Magnabosco</h3>
-</div>
+**EESTech Challenge Hackathon — May 2025**
 
-di Nicola Battison, Christian Faccio, Manuel Magnabosco  
-Maggio 2025 
+A web application that optimises e-bike battery usage along a planned route, adapting motor power delivery in real time to match the rider's effort preference and arrival battery target.
 
-## Problema Identificato
+**Team:** Nicola Battison · Christian Faccio · Manuel Magnabosco
 
-Il mercato delle e-bike sta crescendo rapidamente, ma gli attuali sistemi di gestione energetica presentano limitazioni significative:
+---
 
-- **Gestione inefficiente della batteria**: Gli utenti spesso rimangono con batteria scarica prima di completare il percorso,
-- **Pianificazione del percorso rigida**: Gli utenti non possono ottimizzare i loro tragitti in base alle proprie preferenze di sforzo e autonomia,  
-- **Esperienza utente poco personalizzata**: Con questo sistema non ci sono limitazioni come i "5 livelli di potenza" ma il programma si occupa dell'erogazione della potenza su una scala super discreta così da permettere di avere un'esperienza basata sul sentiment scelto e che non richiede intervento da parte dell'utente,
+## Problem
 
-## La Nostra Soluzione: eBike Smart Assist
+Current e-bike energy management systems have three main shortcomings:
 
-Un'applicazione mobile innovativa che utilizza intelligenza artificiale per ottimizzare l'esperienza di utilizzo delle e-bike, permettendo agli utenti di:
+- **Binary assist levels** force the rider to manually switch between a handful of fixed power steps.
+- **No route awareness** — the motor has no knowledge of upcoming hills or the remaining distance.
+- **Battery anxiety** — riders often run out of charge before completing the trip with no advance warning.
 
-1. **Personalizzare il livello di sforzo fisico** attraverso un controllo intuitivo 
-2. **Gestire l'autonomia della batteria** in modo flessibile
+## Solution
 
-## Tecnologie e Implementazione
+eBike Smart Assist lets the rider express intent in natural terms ("I want a moderate workout, arriving with ≥ 30 % battery") and handles the rest automatically.
 
-### Architettura del Sistema
+The app takes a GPS route, the rider's effort preference (1–5 scale), a target speed mode (Eco / City / Sport), and the desired arrival battery level, then computes a per-segment power schedule that satisfies all constraints.
+
+![System architecture](scheme.png)
+
+---
+
+## Features
+
+| Area | Details |
+|---|---|
+| Route upload | GPX, CSV, TCX files; mock generator for demos |
+| Optimisation engine | Linear programming (PuLP-WASM) with heuristic fallback |
+| Battery health model | SOH (State of Health) degradation estimate per ride, based on NASA battery dataset |
+| Real-time simulation | Second-by-second ride playback with dynamic power recommendations |
+| Infeasibility handling | Detects when constraints cannot be met and suggests parameter adjustments |
+| Visualisations | Elevation profile, per-segment power allocation, live battery chart |
+
+---
+
+## Tech Stack
+
+**Frontend**
+
+- React 18 + TypeScript
+- Vite (build tool)
+- Tailwind CSS
+- Recharts (data visualisation)
+- React Router v6
+
+**Optimisation**
+
+- [PuLP-WASM](https://github.com/coin-or/pulp) — linear programming solver compiled to WebAssembly, running entirely in the browser
+- Heuristic fallback algorithm for environments where WASM is unavailable
+
+**Data & Research**
+
+- NASA battery degradation dataset (SOH modelling)
+- Python / Jupyter for exploratory analysis (see [`research/`](research/))
+
+---
+
+## How It Works
 
 ```
-Utente -> Interfaccia Web -> Algoritmo di Ottimizzazione -> Sistema di Controllo e-Bike
+1. Upload Route      →  parse GPX/CSV, extract elevation profile
+2. Set Preferences   →  effort level, speed mode, completion time, rider weight
+3. Optimise          →  LP solver minimises SOH degradation subject to power-balance
+                        and hardware constraints (32–42 V, 0–15 A per segment)
+4. Ride              →  real-time adjustment recommendations as terrain changes
 ```
 
-### Componenti Principali
+The optimisation objective is to minimise battery stress (voltage and current deviation from nominal), which directly extends battery lifespan.
 
-#### App Mobile
-- Interface per inserimento link Google Maps
-- Slider orizzontale per selezione livello di sforzo 
-- Controllo percentuale batteria desiderata all'arrivo
-- Schermata di suggerimenti in caso di impossibilità
+---
 
-#### Sistema di Ottimizzazione 
-- Algoritmo che calcola la distribuzione ottimale della potenza
-- Sistema di erogazione che si adatta allo stile selto
-- Aggiornamento in tempo reale delle stime
+## Project Structure
 
-## Flusso Operativo
+```
+├── app/                   React + TypeScript web application
+│   └── src/
+│       ├── pages/         Dashboard, RouteAnalysis, BatteryOptimizer, RealTimeAdjustments
+│       ├── components/    Charts, layout components, UI primitives
+│       ├── context/       Global state (BatteryContext)
+│       ├── utils/         optimizeBattery(), getRealTimePowerRecommendation()
+│       └── types/         Shared TypeScript interfaces
+├── data/                  GPS traces and battery health datasets (CSV, GPX)
+├── research/              Jupyter notebook, PDF reports, degradation plots, MATLAB data
+├── prototype/             Early Python prototype (Streamlit UI, SOH model, GPX converters)
+└── scheme.png             System architecture diagram
+```
 
-### Input Utente
-- Link del percorso Google Maps 
-- Livello di sforzo desiderato (0-100%)
-- Livello di sentiment desiderato (eco, city, sport)
+> **Note:** `research/` contains the exploratory data analysis and battery degradation modelling. `prototype/` is the initial Python/Streamlit proof of concept built before the React app.
 
-### Elaborazione
-- Analisi del percorso (pendenze, distanza, condizioni traffico)
-- Ottimizzazione distribuzione energetica lungo il percorso
+---
 
-### Output e Controllo
-- Se fattibile: modulazione potenza motore in tempo reale
-  
-## Sviluppi Futuri
+## Getting Started
 
-### Espansione Funzionalità
+```bash
+cd app
+npm install
+npm run dev
+```
 
-- Suggerimenti per modifiche parametri per ottimizzare il consumo o la velocità e la fattibilità
-- Opzione cambio percorso alternativo 
+The app runs at `http://localhost:5173`. No backend is required — the optimisation runs fully in-browser via WebAssembly.
 
-### Miglioramenti Tecnologici
+To try it without a real route file, click **"Generate Mock Route"** on the Route Analysis page.
 
-- Calcolo fattibilità basato su parametri utente
-- **Machine Learning avanzato**: Predizione più accurata basata su comportamenti storici
+---
 
-## Conclusione
+## Research Background
 
-eBike Smart Assist rappresenta un'innovazione significativa nel settore della mobilità elettrica, combinando tecnologia avanzata con un'interfaccia user-friendly per creare un'esperienza di guida personalizzata e ottimizzata. La nostra soluzione non solo risolve problemi esistenti ma apre nuove possibilità per il futuro della mobilità sostenibile urbana.
+Battery State of Health (SOH) degradation was modelled using the [NASA Battery Aging Dataset](https://www.nasa.gov/content/prognostics-center-of-excellence-data-set-repository). The [`research/hackathon.ipynb`](research/hackathon.ipynb) notebook contains the full exploratory analysis, degradation model fitting, and capacity plots.
+
+---
+
+## Future Work
+
+- Integration with real Google Maps / Strava route APIs
+- On-bike hardware interface for live power delivery
+- Personalised SOH model trained on individual rider history
+- Alternative route suggestion when constraints are infeasible
